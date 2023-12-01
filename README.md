@@ -21,7 +21,7 @@ T-Convert is a command-line based currency converter application developed in C 
 3. Receive instant conversion results or view supported currencies.
 
 **Development:**<br>
-This application was developed by a group of Velasco from BSIT 1B as a project for learning C programming, API integration, and JSON parsing.
+This application was developed by a group of mine from BSIT 1B at the University of Caloocan City (UCC) as a case study project for learning the fundamentals of programming using C.
 
 **How to Contribute:**<br>
 Feel free to contribute to T-Convert by opening issues for bugs or feature requests. Pull requests with improvements or new features are welcome!
