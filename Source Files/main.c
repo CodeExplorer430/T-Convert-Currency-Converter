@@ -1,13 +1,13 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
-#include <conio.h>
-#include <ctype.h>
-#include <time.h>
-#include <windows.h>
-#include <curl/curl.h>
-#include "cJSON.h"
+#include <stdio.h>      // Standard input-output library for basic I/O functions like printf and scanf
+#include <stdlib.h>     // Standard library providing functions for memory allocation, random numbers, etc.
+#include <stdbool.h>    // Library for using boolean data type with true and false values
+#include <string.h>     // Library for string manipulation functions like strlen, strcpy, etc.
+#include <conio.h>      // Header file for console I/O functions (mainly for getch() to read character input without echoing it)
+#include <ctype.h>      // Library for character handling functions like isdigit, isalpha, etc.
+#include <time.h>       // Library for date and time functions like time, localtime, etc.
+#include <windows.h>    // Library providing functions for Windows API and system-related functions
+#include <curl/curl.h>  // Library for making HTTP requests and working with URLs using libcurl
+#include "cJSON.h"      // Header for cJSON, a lightweight JSON parsing library
 
 
 // Constants for URL format, API key, and buffer size
