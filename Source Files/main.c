@@ -338,63 +338,62 @@ double validateAmount() {
 
 
 // Function to validate date format (YYYY-MM-DD)
-int validateDateFormat(const char* date) {
+bool validateDateFormat(const char* date) {
+    // Check if the input string's length is not equal to 10 (YYYY-MM-DD has 10 characters)
     if (strlen(date) != 10) {
-        return 0; // Invalid length
+        return false; // Return false for an invalid length
     }
+
+    // Iterate through each character in the input string
     for (int i = 0; i < 10; ++i) {
+        // Check for positions where the delimiter '-' should be present (positions 4 and 7)
         if (i == 4 || i == 7) {
+            // If the character is not a '-', return false for an invalid delimiter
             if (date[i] != '-') {
-                return 0; // Invalid delimiter
+                return false; // Return false for an invalid delimiter
             }
         } else {
+            // Check if the characters at positions other than the delimiter are not digits
             if (date[i] < '0' || date[i] > '9') {
-                return 0; // Invalid character
+                return false; // Return false for an invalid character (non-digit)
             }
         }
     }
-    return 1; // Valid format
+    return true; // If all conditions pass, return true for a valid format
 }
 
 
 // Function to validate the date input
 void validateDateInput(char* date) {
-    int dateValid = 0; // Flag to track if the date is valid
-    do {
+    while (true) {
         printf("\n\t\t\t\t\t\t\tEnter the date for exchange rates (YYYY-MM-DD or type 'today' for current date): \n");
         printf("\t\t\t\t\t\t\t> ");
-        fgets(date, 50, stdin); // Read input
 
-        // Remove newline character if present
-        size_t length = strlen(date);
-        if (length > 0 && date[length - 1] == '\n') {
-            date[length - 1] = '\0';
+        if (scanf("%10s", date) != 1) { // Read input and ensure it's not more than 10 characters
+            printf("\n\t\t\t\t\t\t\tError: Invalid input.\n");
+            while (getchar() != '\n'); // Clear input buffer
+            continue;
         }
 
-        // Convert the user input to lowercase before comparison
-        toLowercase(date); // Convert 'date' to lower
-
-        // Validate empty input
-        if (strlen(date) == 0) {
-            printf("\n\t\t\t\t\t\t\tError: Please enter a valid date.\n");
-            continue; // Continue loop to prompt for input again
-        }
+        // Convert the user input to lowercase for case-insensitive comparison
+        toLowercase(date);
 
         // Check if the user input is 'today' and fetch the current date
         if (strcmp(date, "today") == 0) {
+            // Handle fetching current date here if needed
             getCurrentDate(date); // Get the current date in YYYY-MM-DD format
-            dateValid = 1; // Set flag to indicate valid date
-        } else {
-            // Validate the entered date format
-            if (validateDateFormat(date)) {
-                dateValid = 1; // Set flag to indicate valid date
-            } else {
-                printf("\n\t\t\t\t\t\t\tError: Invalid date format. Please use YYYY-MM-DD format.\n");
-            }
+            printf("\n\n\t\t\t\t\t\t\tFetching current date...\n");
+            break; // Break the loop for 'today' input
         }
-    } while (!dateValid); // Repeat until a valid date is obtained
-}
 
+        // Validate the entered date format
+        if (validateDateFormat(date)) {
+            break; // Valid date format, exit the loop
+        } else {
+            printf("\n\t\t\t\t\t\t\tError: Invalid date format. Please use YYYY-MM-DD format or type 'today'.\n");
+        }
+    }
+}
 
 // Perform currency conversion using FX Rates API with cJSON for JSON parsing
 void performCurrencyConversion(double amount, const char* fromCurrency, const char* toCurrency, const char* date) {
@@ -499,6 +498,8 @@ void performCurrencyConversion(double amount, const char* fromCurrency, const ch
                     displayLastUpdatedTime();
 
                     printf("\t\t\t\t\t\t\t-----------------------------------------------------------------");
+                    
+                    clearInputBuffer();
 
                     cJSON_Delete(jsonResponse); // Clean up cJSON object
                     curl_slist_free_all(headers);
@@ -780,5 +781,4 @@ int main() {
 
     return 0;
 }
-
 
