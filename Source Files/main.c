@@ -5,6 +5,7 @@
 #include <conio.h>      // Header file for console I/O functions (mainly for getch() to read character input without echoing it)
 #include <ctype.h>      // Library for character handling functions like isdigit, isalpha, etc.
 #include <time.h>       // Library for date and time functions like time, localtime, etc.
+#include <winsock2.h>  // Header providing Winsock 2 API declarations for network programming on Windows
 #include <windows.h>    // Library providing functions for Windows API and system-related functions
 #include <curl/curl.h>  // Library for making HTTP requests and working with URLs using libcurl
 #include "cJSON.h"      // Header for cJSON, a lightweight JSON parsing library
@@ -28,6 +29,15 @@ struct MemoryStruct {
     char *memory;   // Pointer to store memory data (e.g., API response)
     size_t size;    // Size of the memory allocated for data storage
 };
+
+
+// Function to clear the input buffer
+void clearInputBuffer() {
+    int c;
+    // Loop through and consume characters in the input buffer until encountering a newline or EOF
+    while ((c = getchar()) != '\n' && c != EOF);
+    // Note: EOF represents the end-of-file indicator
+}
 
 
 // Function to perform currency conversion
@@ -558,37 +568,6 @@ void displayInitialInterface() {
 }
 
 
-// Function to clear the input buffer
-void clearInputBuffer() {
-    int c;
-    // Loop through and consume characters in the input buffer until encountering a newline or EOF
-    while ((c = getchar()) != '\n' && c != EOF);
-    // Note: EOF represents the end-of-file indicator
-}
-
-
-// Function to get the user's choice with error handling
-int getUserChoice() {
-    int choice = 0; // Initialize the choice variable
-
-    // Loop indefinitely until a valid choice is entered
-    while (1) {
-        printf("\t\t\t\t\t\t\tEnter your choice (1-3): \n");
-        printf("\t\t\t\t\t\t\t> ");
-
-        // Get user input with error handling to ensure it's a number between 1 and 3
-        int inputSuccess = getChoiceWithErrorHandling(&choice);
-
-        // If input is unsuccessful (invalid choice), continue prompting for input
-        if (!inputSuccess) {
-            continue;
-        } else {
-            return choice; // Exit the loop and return the valid choice
-        }
-    }
-}
-
-
 // Function to get user input and validate for a choice between 1 and 3
 int getChoiceWithErrorHandling(int *choice) {
     char input[50]; // Array to store user input
@@ -626,6 +605,28 @@ int getChoiceWithErrorHandling(int *choice) {
     }
 
     return 1; // Return 1 to indicate valid input
+}
+
+
+// Function to get the user's choice with error handling
+int getUserChoice() {
+    int choice = 0; // Initialize the choice variable
+
+    // Loop indefinitely until a valid choice is entered
+    while (1) {
+        printf("\t\t\t\t\t\t\tEnter your choice (1-3): \n");
+        printf("\t\t\t\t\t\t\t> ");
+
+        // Get user input with error handling to ensure it's a number between 1 and 3
+        int inputSuccess = getChoiceWithErrorHandling(&choice);
+
+        // If input is unsuccessful (invalid choice), continue prompting for input
+        if (!inputSuccess) {
+            continue;
+        } else {
+            return choice; // Exit the loop and return the valid choice
+        }
+    }
 }
 
 
@@ -781,4 +782,3 @@ int main() {
 
     return 0;
 }
-
