@@ -116,9 +116,9 @@ void displaySupportedCurrencies() {
 
         if (res != CURLE_OK) {
             // Display error message if request fails
-            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+            fprintf(stderr, "\n\t\t\t\t\t\t\tcurl_easy_perform() failed: %s\n", curl_easy_strerror(res));
             if (errorBuffer[0] != '\0') {
-                fprintf(stderr, "Error: %s\n", errorBuffer);
+                fprintf(stderr, "\n\t\t\t\t\t\t\tError: %s\n", errorBuffer);
             }
         } else {
             // Parse JSON response and display currency codes and names
@@ -175,9 +175,9 @@ void fetchSupportedCurrencies() {
 
         if (res != CURLE_OK) {
             // Display error message if request fails
-            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+            fprintf(stderr, "\n\t\t\t\t\t\t\tcurl_easy_perform() failed: %s\n", curl_easy_strerror(res));
             if (errorBuffer[0] != '\0') {
-                fprintf(stderr, "Error: %s\n", errorBuffer);
+                fprintf(stderr, "\n\t\t\t\t\t\t\tError: %s\n", errorBuffer);
             }
         } else {
             // Parse JSON response and store currency codes globally
@@ -263,7 +263,7 @@ bool isValidCurrency(const char* currencyCode) {
 // Loops until a valid non-empty currency code is entered, displaying error messages as needed
 void validateCurrency(char* currency, const char* type) {
     while (1) {
-        printf("\n\t\t\t\t\t\t\tPlease select your %s currency (e.g., GBP): \n", type);
+        printf("\n\t\t\t\t\t\t\tPlease select your %s currency (e.g., GBP, USD, EUR): \n", type);
         printf("\t\t\t\t\t\t\t> ");
         fgets(currency, 50, stdin); // Read input
 
@@ -405,27 +405,48 @@ void validateDateInput(char* date) {
     }
 }
 
+
+// Function to get the current date in YYYY-MM-DD format (UTC)
+void getCurrentDateUTC(char* currentDate) {
+    time_t rawtime;
+    struct tm* timeinfo;
+
+    time(&rawtime);
+    timeinfo = gmtime(&rawtime);
+
+    strftime(currentDate, 11, "%Y-%m-%d", timeinfo);
+}
+
 // Perform currency conversion using FX Rates API with cJSON for JSON parsing
 void performCurrencyConversion(double amount, const char* fromCurrency, const char* toCurrency, const char* date) {
     // Validate 'fromCurrency'
     if (!isValidCurrency(fromCurrency)) {
-        fprintf(stderr, "\n\t\t\t\t\t\t\tError: Invalid 'from' currency code.\n");
+        fprintf(stderr, "\n\t\t\t\t\t\t\tError: Invalid 'from' currency code.\n\n");
         return;
     }
 
     // Validate 'toCurrency'
     if (!isValidCurrency(toCurrency)) {
-        fprintf(stderr, "\n\t\t\t\t\t\t\tError: Invalid 'to' currency code.\n");
+        fprintf(stderr, "\n\t\t\t\t\t\t\tError: Invalid 'to' currency code.\n\n");
         return;
     }
 
     // Validate 'date' format
     if (!validateDateFormat(date)) {
-        fprintf(stderr, "\n\t\t\t\t\t\t\tError: Invalid date format. Please use YYYY-MM-DD format.\n");
+        fprintf(stderr, "\n\t\t\t\t\t\t\tError: Invalid date format. Please use YYYY-MM-DD format.\n\n");
         return;
     }
+	
+	char currentDate[11]; // Buffer to store current date in YYYY-MM-DD format
+    getCurrentDateUTC(currentDate); // Get current date in UTC
 
-    // Create the API URL
+    // If the date is in the future, set it to the current date in UTC
+    if (strcmp(date, currentDate) > 0) {
+        printf("\n\t\t\t\t\t\t\tDate parameter adjusted to current UTC date.\n\n");
+        date = currentDate;
+    }
+        
+	
     char url[200];
     sprintf(url, URL_CONVERT, fromCurrency, toCurrency, date, amount);
 
@@ -457,7 +478,7 @@ void performCurrencyConversion(double amount, const char* fromCurrency, const ch
 
         if (res != CURLE_OK) {
             // Handle request failure
-            fprintf(stderr, "\n\t\t\t\t\t\t\tFailed to fetch exchange rates: %s\n", curl_easy_strerror(res));
+            fprintf(stderr, "\n\t\t\t\t\t\t\tFailed to fetch exchange rates: %s\n\n", curl_easy_strerror(res));
             curl_slist_free_all(headers);
             curl_easy_cleanup(curl);
             return;
@@ -473,16 +494,20 @@ void performCurrencyConversion(double amount, const char* fromCurrency, const ch
                 cJSON* error = cJSON_GetObjectItemCaseSensitive(jsonResponse, "error");
                 cJSON* description = cJSON_GetObjectItemCaseSensitive(jsonResponse, "description");
                 if (cJSON_IsString(error) && cJSON_IsString(description)) {
-                    fprintf(stderr, "\n\t\t\t\t\t\t\tFailed to fetch exchange rates.\n");
+                    fprintf(stderr, "\n\t\t\t\t\t\t\tFailed to fetch exchange rates.\n\n");
                     // Print error details
-                    fprintf(stderr, "\n\t\t\t\t\t\t\t--------------------------------------------------\n");
+                    fprintf(stderr, "\n\t\t\t\t\t\t\tError Result:");
+                    fprintf(stderr, "\n\t\t\t\t\t\t\t--------------------------------------------------");
                     fprintf(stderr, "\n\t\t\t\t\t\t\tError: %s\n", error->valuestring);
-                    fprintf(stderr, "\n\t\t\t\t\t\t\tDescription: %s\n", description->valuestring);
+                    fprintf(stderr, "\n\t\t\t\t\t\t\tDescription: %s", description->valuestring);
                     fprintf(stderr, "\n\t\t\t\t\t\t\t--------------------------------------------------");
 
                     cJSON_Delete(jsonResponse); // Clean up cJSON object
                     curl_slist_free_all(headers);
                     curl_easy_cleanup(curl);
+                    
+                    clearInputBuffer(); // Clear the input buffer
+                    
                     return;
                 }
             }
@@ -648,8 +673,12 @@ int validateSubChoice(int *choice) {
 
         if (!inputSuccess) {
             continue; // Loop if invalid input
+        } else if (subChoice == 2) {
+            printf("\n\n\t\t\t\t\t\t\tReturning to the main menu...");
+            *choice = subChoice; // Set the value of choice to the validated sub-choice        
+            return 1; // Exit loop if a valid choice is entered
         } else {
-            *choice = subChoice; // Set the value of choice to the validated sub-choice
+            *choice = subChoice; // Set the value of choice to the validated sub-choice        
             return 1; // Exit loop if a valid choice is entered
         }
     } while (1);
