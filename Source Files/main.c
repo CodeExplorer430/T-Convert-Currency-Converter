@@ -408,14 +408,21 @@ void validateDateInput(char* date) {
 
 // Function to get the current date in YYYY-MM-DD format (UTC)
 void getCurrentDateUTC(char* currentDate) {
-    time_t rawtime;
-    struct tm* timeinfo;
+    time_t rawtime;         // Variable to hold the raw time (seconds since epoch)
+    struct tm* timeinfo;    // Structure to hold time components
 
-    time(&rawtime);
-    timeinfo = gmtime(&rawtime);
+    time(&rawtime);         // Get current time in seconds since epoch
 
+    timeinfo = gmtime(&rawtime); // Convert raw time to UTC time structure
+
+    // Format the time according to YYYY-MM-DD and store it in 'currentDate'
+    // strftime() formats time according to the specified format and stores it in the provided string
     strftime(currentDate, 11, "%Y-%m-%d", timeinfo);
+    // '%Y' - Year with century as a decimal number
+    // '%m' - Month as a decimal number (01-12)
+    // '%d' - Day of the month as a decimal number (01-31)
 }
+
 
 // Perform currency conversion using FX Rates API with cJSON for JSON parsing
 void performCurrencyConversion(double amount, const char* fromCurrency, const char* toCurrency, const char* date) {
